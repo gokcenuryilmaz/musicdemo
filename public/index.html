@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Müzik Uygulaması</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        ul { list-style-type: none; margin: 0; padding: 0; }
+        li { padding: 8px; margin-bottom: 10px; background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>Müzik Paylaşım Uygulaması</h1>
+    <ul id="tracks"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Müzik parçası ismi yazın..." /><button>Gönder</button>
+    </form>
+
+    <script>
+        const socket = io();
+
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (input.value) {
+                socket.emit('music track', input.value);
+                input.value = '';
+            }
+        });
+
+        socket.on('music track', function(track) {
+            const item = document.createElement('li');
+            item.textContent = track;
+            document.getElementById('tracks').appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+</html>
