@@ -13,9 +13,15 @@
 </head>
 <body>
     <h1>Müzik Paylaşım Uygulaması</h1>
+    
+    <input type="file" id="fileInput" accept="audio/*" />
+    <button id="uploadButton">Müzik Yükle</button>
+
     <ul id="tracks"></ul>
+
     <form id="form" action="">
-        <input id="input" autocomplete="off" placeholder="Müzik parçası ismi yazın..." /><button>Gönder</button>
+        <input id="input" autocomplete="off" placeholder="Müzik parçası ismi yazın..." />
+        <button>Gönder</button>
     </form>
 
     <script>
@@ -23,6 +29,8 @@
 
         const form = document.getElementById('form');
         const input = document.getElementById('input');
+        const fileInput = document.getElementById('fileInput');
+        const uploadButton = document.getElementById('uploadButton');
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -32,9 +40,36 @@
             }
         });
 
+        uploadButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    socket.emit('music file', {
+                        name: file.name,
+                        audio: e.target.result
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         socket.on('music track', function(track) {
             const item = document.createElement('li');
             item.textContent = track;
+            document.getElementById('tracks').appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        socket.on('music file', function(fileData) {
+            const item = document.createElement('li');
+            const audioElement = document.createElement('audio');
+            audioElement.src = fileData.audio;
+            audioElement.controls = true;
+            audioElement.preload = 'auto';
+            item.textContent = fileData.name;
+            item.appendChild(audioElement);
             document.getElementById('tracks').appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
